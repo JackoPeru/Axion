@@ -1,0 +1,43 @@
+name: Android Release APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: android-actions/setup-android@v3
+
+      - run: npm ci
+
+      - run: npx expo prebuild --platform android --clean --no-install
+
+      - run: ./gradlew assembleRelease
+        working-directory: android
+        env:
+          NODE_ENV: production
+
+      - run: cp android/app/build/outputs/apk/release/app-release.apk Axion-${GITHUB_REF_NAME#v}-release.apk
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: Axion-*-release.apk
+          generate_release_notes: true

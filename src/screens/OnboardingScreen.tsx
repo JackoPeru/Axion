@@ -3,15 +3,21 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import type { Faction } from '../types/domain';
+import type { CloudAuthMode } from '../services/authService';
 import { theme } from '../theme/theme';
 
 type OnboardingScreenProps = {
+  authEnabled: boolean;
+  authMessage?: string;
   factions: Faction[];
+  onCloudAuth: (email: string, password: string, mode: CloudAuthMode) => void;
   onSelectFaction: (faction: Faction, alias: string) => void;
 };
 
-export function OnboardingScreen({ factions, onSelectFaction }: OnboardingScreenProps) {
+export function OnboardingScreen({ authEnabled, authMessage, factions, onCloudAuth, onSelectFaction }: OnboardingScreenProps) {
   const [alias, setAlias] = useState('Operatore 17');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   return (
     <View style={styles.container}>
@@ -38,6 +44,34 @@ export function OnboardingScreen({ factions, onSelectFaction }: OnboardingScreen
           style={styles.input}
           value={alias}
         />
+        <Text style={styles.loginLabel}>Accesso cloud</Text>
+        <Text style={styles.authHint}>{authEnabled ? 'Supabase attivo. Login cloud disponibile.' : 'Supabase non configurato. Profilo locale attivo.'}</Text>
+        <TextInput
+          autoCapitalize="none"
+          keyboardType="email-address"
+          onChangeText={setEmail}
+          placeholder="email"
+          placeholderTextColor={theme.colors.textMuted}
+          style={styles.input}
+          value={email}
+        />
+        <TextInput
+          onChangeText={setPassword}
+          placeholder="password"
+          placeholderTextColor={theme.colors.textMuted}
+          secureTextEntry
+          style={styles.input}
+          value={password}
+        />
+        <View style={styles.authActions}>
+          <Pressable disabled={!authEnabled} onPress={() => onCloudAuth(email, password, 'sign-in')} style={[styles.authButton, !authEnabled && styles.authDisabled]}>
+            <Text style={styles.authButtonText}>Login</Text>
+          </Pressable>
+          <Pressable disabled={!authEnabled} onPress={() => onCloudAuth(email, password, 'sign-up')} style={[styles.authButton, !authEnabled && styles.authDisabled]}>
+            <Text style={styles.authButtonText}>Registrati</Text>
+          </Pressable>
+        </View>
+        {authMessage ? <Text style={styles.authMessage}>{authMessage}</Text> : null}
       </View>
       <View style={styles.list}>
         {factions.map((faction) => (
@@ -136,6 +170,38 @@ const styles = StyleSheet.create({
     fontSize: 16,
     minHeight: 46,
     paddingHorizontal: theme.spacing.md,
+  },
+  authHint: {
+    color: theme.colors.textMuted,
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  authActions: {
+    flexDirection: 'row',
+    gap: theme.spacing.sm,
+  },
+  authButton: {
+    alignItems: 'center',
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.borderStrong,
+    borderRadius: theme.radius.sm,
+    borderWidth: 1,
+    flex: 1,
+    minHeight: 40,
+    justifyContent: 'center',
+  },
+  authDisabled: {
+    opacity: 0.42,
+  },
+  authButtonText: {
+    color: theme.colors.text,
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  authMessage: {
+    color: theme.colors.warning,
+    fontSize: 12,
+    lineHeight: 17,
   },
   factionCard: {
     backgroundColor: theme.colors.surfaceRaised,

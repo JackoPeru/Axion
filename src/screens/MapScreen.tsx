@@ -1,5 +1,7 @@
+import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
+import MapView, { Circle, Marker, UrlTile, type Region } from 'react-native-maps';
 import type { Faction, FactionScores, Mission, PartnerVenue, Reward, UserProfile, Zone } from '../types/domain';
 import { factions } from '../data/mockData';
 import { theme } from '../theme/theme';
@@ -17,34 +19,91 @@ type MapScreenProps = {
   onOpenMission: (missionId: string) => void;
 };
 
-export function MapScreen({ missions, onOpenMission, zones }: MapScreenProps) {
+export function MapScreen({ missions, onOpenMission, partnerVenues, zones }: MapScreenProps) {
+  const [locationStatus, setLocationStatus] = useState('Posizione non ancora richiesta.');
+  const [userCoordinate, setUserCoordinate] = useState<{ latitude: number; longitude: number }>();
+
+  const initialRegion = useMemo<Region>(() => {
+    const firstZone = zones[0];
+    return {
+      latitude: firstZone?.center.latitude ?? 45.4642,
+      longitude: firstZone?.center.longitude ?? 9.19,
+      latitudeDelta: 0.055,
+      longitudeDelta: 0.055,
+    };
+  }, [zones]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    Location.requestForegroundPermissionsAsync()
+      .then((permission) => {
+        if (!permission.granted) {
+          setLocationStatus('Permesso posizione non concesso. Mappa zone disponibile senza posizione utente.');
+          return undefined;
+        }
+
+        return Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      })
+      .then((position) => {
+        if (position && mounted) {
+          setUserCoordinate({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+          setLocationStatus('Posizione utente attiva.');
+        }
+      })
+      .catch(() => setLocationStatus('Posizione non disponibile. Verifica GPS dispositivo.'));
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   return (
-    <Screen eyebrow="Vista zone" title="Mappa operativa" subtitle="Mock geografico pronto per sostituire vista zone con Mapbox, Google Maps o Expo Maps.">
-      <View style={styles.mapMock}>
-        <View style={[styles.gridLine, styles.gridLineHorizontal, { top: '30%' }]} />
-        <View style={[styles.gridLine, styles.gridLineHorizontal, { top: '62%' }]} />
-        <View style={[styles.gridLine, styles.gridLineVertical, { left: '34%' }]} />
-        <View style={[styles.gridLine, styles.gridLineVertical, { left: '68%' }]} />
-        <View style={styles.scanArea}>
-          <Ionicons color={theme.colors.gold} name="scan-outline" size={30} />
-          <Text style={styles.scanText}>CITY GRID</Text>
-        </View>
-        {zones.map((zone, index) => (
-          <View
-            key={zone.id}
-            style={[
-              styles.node,
-              {
-                left: `${12 + (index % 3) * 32}%`,
-                top: `${14 + Math.floor(index / 3) * 42}%`,
-                borderColor: factions.find((faction) => faction.id === zone.controllingFactionId)?.color ?? theme.colors.border,
-              },
-            ]}
-          >
-            <Text style={styles.nodeText}>{zone.district}</Text>
-            <Text style={styles.nodeMeta}>{zone.heatLevel}</Text>
-          </View>
-        ))}
+    <Screen eyebrow="Mappa reale" title="Zone operative" subtitle={locationStatus}>
+      <View style={styles.mapFrame}>
+        <MapView
+          initialRegion={initialRegion}
+          mapType="none"
+          showsCompass
+          showsUserLocation={Boolean(userCoordinate)}
+          style={styles.map}
+        >
+          <UrlTile maximumZ={19} tileSize={256} urlTemplate="https://tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          {zones.map((zone) => {
+            const owner = factions.find((faction) => faction.id === zone.controllingFactionId);
+            const zoneMission = missions.find((mission) => mission.zoneId === zone.id && mission.status !== 'completed');
+            return (
+              <View key={zone.id}>
+                <Circle
+                  center={zone.center}
+                  fillColor={`${owner?.color ?? '#C8A96A'}26`}
+                  radius={zone.radiusMeters}
+                  strokeColor={owner?.color ?? theme.colors.gold}
+                  strokeWidth={2}
+                />
+                <Marker
+                  coordinate={zone.center}
+                  description={`Heat ${zone.heatLevel} / ${owner?.name ?? 'N.D.'}`}
+                  onPress={zoneMission ? () => onOpenMission(zoneMission.id) : undefined}
+                  pinColor={owner?.color ?? theme.colors.gold}
+                  title={zone.name}
+                />
+              </View>
+            );
+          })}
+          {partnerVenues.map((venue) => (
+            <Marker
+              key={venue.id}
+              coordinate={venue.coordinates}
+              description={`${venue.category} / outpost ${venue.outpostCode}`}
+              pinColor={theme.colors.gold}
+              title={venue.name}
+            />
+          ))}
+        </MapView>
       </View>
       {zones.map((zone) => {
         const zoneMission = missions.find((mission) => mission.zoneId === zone.id && mission.status !== 'completed');
@@ -57,71 +116,17 @@ export function MapScreen({ missions, onOpenMission, zones }: MapScreenProps) {
 }
 
 const styles = StyleSheet.create({
-  mapMock: {
+  mapFrame: {
     backgroundColor: '#0B1018',
     borderColor: theme.colors.border,
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    height: 280,
+    height: 360,
     overflow: 'hidden',
-  },
-  gridLine: {
-    backgroundColor: theme.colors.line,
-    opacity: 0.75,
-    position: 'absolute',
-  },
-  gridLineHorizontal: {
-    height: 1,
-    left: 0,
-    right: 0,
-  },
-  gridLineVertical: {
-    bottom: 0,
-    top: 0,
-    width: 1,
-  },
-  scanArea: {
-    alignItems: 'center',
-    borderColor: theme.colors.border,
-    borderRadius: 999,
-    borderWidth: 1,
-    height: 112,
-    justifyContent: 'center',
-    left: '50%',
-    marginLeft: -56,
-    marginTop: -56,
-    opacity: 0.62,
-    position: 'absolute',
-    top: '50%',
-    width: 112,
-  },
-  scanText: {
-    color: theme.colors.gold,
-    fontSize: 10,
-    fontWeight: '900',
-    marginTop: 5,
-  },
-  node: {
-    alignItems: 'center',
-    backgroundColor: theme.colors.surfaceRaised,
-    borderRadius: theme.radius.sm,
-    borderWidth: 1,
-    minHeight: 44,
-    justifyContent: 'center',
-    paddingHorizontal: 8,
-    position: 'absolute',
-    width: 86,
     ...theme.shadow.card,
   },
-  nodeText: {
-    color: theme.colors.text,
-    fontSize: 11,
-    fontWeight: '800',
-    textAlign: 'center',
-  },
-  nodeMeta: {
-    color: theme.colors.warning,
-    fontSize: 10,
-    fontWeight: '900',
+  map: {
+    height: '100%',
+    width: '100%',
   },
 });

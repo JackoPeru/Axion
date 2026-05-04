@@ -20,6 +20,7 @@ Core loop:
 
 MVP includes mock data for 3 factions, 5 city zones, 10 missions, 3 partner venues, 5 rewards, leaderboard and faction scores.
 Current Android build also includes local persistence, GPS verification, QR outpost validation, timed zone hold, reward redemption and in-app APK updater.
+It also includes a real map layer using OpenStreetMap tiles, optional Supabase auth/sync, signed QR payload support, and GitHub tag-based APK release automation.
 
 ## Stack found
 
@@ -31,7 +32,8 @@ Repository was empty before scaffold. New Android-first stack:
 - TypeScript strict mode
 - Android package `com.axion.app`
 - Persisted local state with `AsyncStorage`
-- Device APIs: location, camera QR, haptics
+- Device APIs: location, camera QR, haptics, native map
+- Optional Supabase backend via `.env`
 
 This is suitable for Android MVP because it keeps iteration fast and can later accept real auth, map SDK, location APIs, QR scanning and backend without replacing product structure.
 
@@ -55,10 +57,26 @@ npm run typecheck
 
 Android build docs: `docs/android.md`.
 
+Optional cloud sync:
+
+```bash
+copy .env.example .env
+```
+
+Set:
+
+```text
+EXPO_PUBLIC_SUPABASE_URL=
+EXPO_PUBLIC_SUPABASE_ANON_KEY=
+EXPO_PUBLIC_AXION_QR_SECRET=
+```
+
+Then run SQL in `docs/backend-schema.sql`.
+
 ## Current limits
 
 - Auth is mock/local only.
-- Map is still a dark zone mock, but mission verification can use real GPS.
+- Map uses OpenStreetMap tiles through native `react-native-maps`.
 - Team missions and demo override are still local MVP flows.
 - QR, anti-cheat, push, payments, chat and real multiplayer are intentionally excluded.
 - Partner and reward redemption are local only.
@@ -66,8 +84,8 @@ Android build docs: `docs/android.md`.
 
 ## Next technical tasks
 
-1. Replace mock zone view with real map SDK.
-2. Add backend schema for users, missions, zones, venues and reward redemptions.
-3. Add server-side location validation and anti-abuse checks.
-4. Add release signing and Play Store/AAB pipeline.
-5. Add weekly events and remote mission feed.
+1. Move anti-cheat from client MVP to Supabase Edge Function.
+2. Add release signing and Play Store/AAB pipeline.
+3. Add weekly events and remote mission feed.
+4. Add partner dashboard for rotating QR payloads.
+5. Add automated device tests for GPS, QR and updater.

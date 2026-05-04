@@ -9,6 +9,9 @@ import { factions, missions, partnerVenues, rewards, users } from './src/data/mo
 import type { AppState, Faction, Mission, MissionStatus, Reward, ScreenName } from './src/types/domain';
 import { completeMission, getMissionReward, getMissionsByStatus, getUserRank } from './src/utils/gameLogic';
 import { createInitialAppState, loadAppState, resetAppState, saveAppState } from './src/utils/appStateStorage';
+import { recordMissionCompletion, recordRewardRedemption, syncProfile } from './src/services/backendSync';
+import { authenticateWithEmail, type CloudAuthMode } from './src/services/authService';
+import { isSupabaseConfigured } from './src/config/env';
 import { theme } from './src/theme/theme';
 import { FactionScreen } from './src/screens/FactionScreen';
 import { HomeScreen } from './src/screens/HomeScreen';
@@ -23,6 +26,7 @@ import { RewardsScreen } from './src/screens/RewardsScreen';
 export default function App() {
   const [appState, setAppState] = useState<AppState>(createInitialAppState());
   const [isReady, setIsReady] = useState(false);
+  const [authMessage, setAuthMessage] = useState<string>();
 
   useEffect(() => {
     let mounted = true;
@@ -70,12 +74,34 @@ export default function App() {
 
   const selectFaction = (faction: Faction, alias: string) => {
     Haptics.selectionAsync();
-    setAppState((current) => ({
-      ...current,
-      selectedFactionId: faction.id,
-      userProfile: { ...current.userProfile, alias, factionId: faction.id },
-      activeScreen: 'home',
-    }));
+    setAppState((current) => {
+      const nextState: AppState = {
+        ...current,
+        selectedFactionId: faction.id,
+        userProfile: { ...current.userProfile, alias, factionId: faction.id },
+        activeScreen: 'home',
+      };
+      syncProfile(nextState);
+      return nextState;
+    });
+  };
+
+  const cloudAuth = async (email: string, password: string, mode: CloudAuthMode) => {
+    setAuthMessage('Connessione cloud...');
+    const result = await authenticateWithEmail(email, password, mode);
+    if (result.error) {
+      setAuthMessage(result.error);
+      return;
+    }
+
+    if (result.userId) {
+      const userId = result.userId;
+      setAppState((current) => ({
+        ...current,
+        userProfile: { ...current.userProfile, id: userId },
+      }));
+      setAuthMessage('Account cloud collegato. Scegli fazione.');
+    }
   };
 
   const acceptMission = (mission: Mission) => {
@@ -102,13 +128,16 @@ export default function App() {
     });
 
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    setAppState((current) => ({
-      ...current,
-      missionStatuses: { ...current.missionStatuses, [mission.id]: 'completed' },
+    const nextState: AppState = {
+      ...appState,
+      missionStatuses: { ...appState.missionStatuses, [mission.id]: 'completed' as MissionStatus },
       zoneState: result.zones,
       factionScores: result.factionScores,
       userProfile: result.user,
-    }));
+    };
+    setAppState(nextState);
+    syncProfile(nextState);
+    recordMissionCompletion(nextState, mission);
   };
 
   const redeemReward = (reward: Reward) => {
@@ -117,13 +146,16 @@ export default function App() {
     }
 
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    setAppState((current) => ({
-      ...current,
+    const nextState = {
+      ...appState,
       userProfile: {
-        ...current.userProfile,
-        redeemedRewardIds: [...current.userProfile.redeemedRewardIds, reward.id],
+        ...appState.userProfile,
+        redeemedRewardIds: [...appState.userProfile.redeemedRewardIds, reward.id],
       },
-    }));
+    };
+    setAppState(nextState);
+    syncProfile(nextState);
+    recordRewardRedemption(nextState, reward);
   };
 
   const resetLocalState = async () => {
@@ -156,7 +188,13 @@ export default function App() {
     return (
       <SafeAreaView style={styles.safeArea}>
         <StatusBar style="light" />
-        <OnboardingScreen factions={factions} onSelectFaction={selectFaction} />
+        <OnboardingScreen
+          authEnabled={isSupabaseConfigured()}
+          authMessage={authMessage}
+          factions={factions}
+          onCloudAuth={cloudAuth}
+          onSelectFaction={selectFaction}
+        />
       </SafeAreaView>
     );
   }

@@ -82,6 +82,19 @@ Release requirement:
 - Attach APK asset, for example `Axion-1.0.1.apk`.
 - Device must allow Axion to install unknown apps when using direct APK updates outside Play Store.
 
+## GitHub release automation
+
+Workflow: `.github/workflows/android-release.yml`.
+
+Push a version tag:
+
+```bash
+git tag v1.0.1
+git push origin v1.0.1
+```
+
+GitHub Actions builds Android release APK and attaches `Axion-1.0.1-release.apk` to the GitHub Release. In-app updater then detects it.
+
 ## Native Android folder
 
 No `android/` folder is committed yet. Expo managed workflow is cleaner for current MVP. Generate native Android project only when custom native modules, signing customization or store-specific native changes become necessary:

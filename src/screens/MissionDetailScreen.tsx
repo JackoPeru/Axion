@@ -9,6 +9,8 @@ import { FactionBadge } from '../components/FactionBadge';
 import { Screen } from '../components/Screen';
 import { distanceMeters, formatDistance } from '../utils/geo';
 import { findMissionVenue, getMissionCompletionMethod, getMissionInstruction } from '../utils/missionValidation';
+import { validateMissionLocation } from '../utils/antiCheat';
+import { createSignedQrPayload, verifySignedQrPayload } from '../utils/signedQr';
 
 type MissionDetailScreenProps = {
   faction: Faction;
@@ -46,6 +48,9 @@ export function MissionDetailScreen({
   const method = getMissionCompletionMethod(mission);
   const venue = useMemo(() => findMissionVenue(mission, venues), [mission, venues]);
   const expectedCode = venue?.outpostCode;
+  const expectedSignedPayload = venue && expectedCode
+    ? createSignedQrPayload({ missionId: mission.id, venueId: venue.id, outpostCode: expectedCode })
+    : undefined;
 
   useEffect(() => {
     if (mission.status !== 'completed' && mission.status !== 'expired' && Date.now() > new Date(mission.expiresAt).getTime()) {
@@ -84,19 +89,16 @@ export function MissionDetailScreen({
     }
 
     const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-    const distance = distanceMeters(
-      { latitude: position.coords.latitude, longitude: position.coords.longitude },
-      zone.center
-    );
-    setDistanceLabel(formatDistance(distance));
+    const validation = validateMissionLocation(position, zone);
+    setDistanceLabel(formatDistance(validation.distance));
 
-    if (distance <= zone.radiusMeters) {
+    if (validation.ok) {
       setStatusMessage('Presenza GPS confermata. Missione completata.');
       onCompleteMission(mission);
       return;
     }
 
-    setStatusMessage(`Fuori raggio operativo: ${formatDistance(distance)} da ${zone.name}.`);
+    setStatusMessage(validation.reason);
   };
 
   const verifyQrCode = (value: string) => {
@@ -108,7 +110,11 @@ export function MissionDetailScreen({
       return;
     }
 
-    if (normalizedValue.includes(normalizedExpected)) {
+    const signedOk = venue
+      ? verifySignedQrPayload(normalizedValue, { missionId: mission.id, outpostCode: normalizedExpected, venueId: venue.id })
+      : false;
+
+    if (signedOk || normalizedValue.includes(normalizedExpected)) {
       setIsScanning(false);
       setStatusMessage('Outpost verificato. Missione completata.');
       onCompleteMission(mission);
@@ -152,14 +158,11 @@ export function MissionDetailScreen({
     }
 
     const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-    const distance = distanceMeters(
-      { latitude: position.coords.latitude, longitude: position.coords.longitude },
-      zone.center
-    );
-    setDistanceLabel(formatDistance(distance));
+    const validation = validateMissionLocation(position, zone);
+    setDistanceLabel(formatDistance(validation.distance));
 
-    if (distance > zone.radiusMeters) {
-      setStatusMessage(`Fuori raggio presidio: ${formatDistance(distance)} da ${zone.name}.`);
+    if (!validation.ok) {
+      setStatusMessage(validation.reason);
       return;
     }
 
@@ -187,6 +190,7 @@ export function MissionDetailScreen({
         <View style={styles.validationPanel}>
           <Text style={styles.label}>Verifica QR</Text>
           <Text style={styles.value}>{getMissionInstruction(mission, zone, venue)}</Text>
+          {expectedSignedPayload ? <Text style={styles.hint}>Payload firmato test: {expectedSignedPayload}</Text> : null}
           {isScanning ? (
             <CameraView
               barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
@@ -346,6 +350,11 @@ const styles = StyleSheet.create({
     color: theme.colors.gold,
     fontSize: 22,
     fontWeight: '900',
+  },
+  hint: {
+    color: theme.colors.textMuted,
+    fontSize: 11,
+    lineHeight: 16,
   },
   actions: {
     gap: theme.spacing.sm,
