@@ -1,0 +1,43 @@
+export const theme = {
+  colors: {
+    background: '#05070A',
+    backgroundElevated: '#090D13',
+    surface: '#0F141C',
+    surfaceRaised: '#151B25',
+    surfaceMuted: '#1B2330',
+    border: '#2A3443',
+    borderStrong: '#3B485B',
+    line: '#18202B',
+    text: '#F4F1EA',
+    textMuted: '#8B95A5',
+    textSoft: '#C7CCD5',
+    success: '#3ED89B',
+    warning: '#D6A84E',
+    danger: '#F05E66',
+    gold: '#C8A96A',
+    vanguard: '#E33C43',
+    syndicate: '#20C7D9',
+    eclipse: '#8E5CFF',
+  },
+  spacing: {
+    xs: 6,
+    sm: 10,
+    md: 14,
+    lg: 20,
+    xl: 28,
+  },
+  radius: {
+    sm: 6,
+    md: 8,
+    lg: 12,
+  },
+  shadow: {
+    card: {
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 12 },
+      shadowOpacity: 0.28,
+      shadowRadius: 18,
+      elevation: 6,
+    },
+  },
+};
