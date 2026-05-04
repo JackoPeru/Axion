@@ -17,7 +17,7 @@ export function OnboardingScreen({ factions, onSelectFaction }: OnboardingScreen
           <View style={styles.brandMark}>
             <Ionicons color={theme.colors.gold} name="scan-outline" size={20} />
           </View>
-          <Text style={styles.eyebrow}>Secret Ops</Text>
+          <Text style={styles.eyebrow}>Axion</Text>
         </View>
         <Text style={styles.title}>Scegli fazione. Entra nella citta attiva.</Text>
         <Text style={styles.subtitle}>

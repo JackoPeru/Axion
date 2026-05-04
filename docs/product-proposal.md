@@ -1,8 +1,8 @@
-# Secret Ops product structure
+# Axion product structure
 
 ## Positioning
 
-Secret Ops is an adult urban social game where city movement produces status, faction power and real-world perks. It should feel closer to an operations network than a collection game.
+Axion is an adult urban social game where city movement produces status, faction power and real-world perks. It should feel closer to an operations network than a collection game.
 
 ## Audience
 

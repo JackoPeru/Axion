@@ -1,10 +1,10 @@
 # Android target
 
-Secret Ops is configured as Android-first Expo app.
+Axion is configured as Android-first Expo app.
 
 ## App identity
 
-- Android package: `com.secretops.app`
+- Android package: `com.axion.app`
 - Version code: `1`
 - Orientation: portrait
 - UI style: dark
@@ -67,8 +67,8 @@ Profile screen includes Android updater modeled after Nemoclaw:
 Release requirement:
 
 - GitHub release tag newer than local version, for example `v1.0.1`.
-- Attach APK asset, for example `SecretOps-1.0.1.apk`.
-- Device must allow Secret Ops to install unknown apps when using direct APK updates outside Play Store.
+- Attach APK asset, for example `Axion-1.0.1.apk`.
+- Device must allow Axion to install unknown apps when using direct APK updates outside Play Store.
 
 ## Native Android folder
 

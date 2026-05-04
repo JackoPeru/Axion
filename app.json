@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Secret Ops",
-    "slug": "secret-ops",
+    "name": "Axion",
+    "slug": "axion",
     "version": "1.0.0",
     "platforms": [
       "android"
@@ -16,7 +16,7 @@
       "backgroundColor": "#07090D"
     },
     "android": {
-      "package": "com.secretops.app",
+      "package": "com.axion.app",
       "versionCode": 1,
       "permissions": [
         "ACCESS_COARSE_LOCATION",

@@ -1,10 +1,10 @@
-# Secret Ops
+# Axion
 
 MVP skeleton for Android social urban game. Built with Expo, React Native and TypeScript.
 
 ## Product proposal
 
-Secret Ops turns real city movement into faction competition. Core value is not sightseeing or trivia. User leaves home because missions can unlock real venue perks, local status, limited events and visible faction control.
+Axion turns real city movement into faction competition. Core value is not sightseeing or trivia. User leaves home because missions can unlock real venue perks, local status, limited events and visible faction control.
 
 Tone: mature, urban, premium, discreet. No mascots, no creatures, no cartoon loop.
 
@@ -28,7 +28,7 @@ Repository was empty before scaffold. New Android-first stack:
 - React Native `0.81`
 - React `19`
 - TypeScript strict mode
-- Android package `com.secretops.app`
+- Android package `com.axion.app`
 - Local state only, no backend yet
 
 This is suitable for Android MVP because it keeps iteration fast and can later accept real auth, map SDK, location APIs, QR scanning and backend without replacing product structure.

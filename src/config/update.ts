@@ -1,6 +1,6 @@
 export const updateConfig = {
-  appName: 'Secret Ops',
-  filePrefix: 'SecretOps',
+  appName: 'Axion',
+  filePrefix: 'Axion',
   githubOwner: 'JackoPeru',
   githubRepo: 'Axion',
   releasesPage: 'https://github.com/JackoPeru/Axion/releases',

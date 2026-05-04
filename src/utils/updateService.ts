@@ -143,7 +143,7 @@ export async function installDownloadedApk(fileUri: string) {
     });
     return 'Installer Android aperto. Conferma aggiornamento.';
   } catch {
-    return 'Installer non aperto. Abilita installazione da origini sconosciute per Secret Ops e riprova.';
+    return 'Installer non aperto. Abilita installazione da origini sconosciute per Axion e riprova.';
   }
 }
 
@@ -153,7 +153,7 @@ export async function openInstallPermissionSettings() {
   }
 
   await IntentLauncher.startActivityAsync(IntentLauncher.ActivityAction.MANAGE_UNKNOWN_APP_SOURCES, {
-    data: `package:${Application.applicationId ?? 'com.secretops.app'}`,
+    data: `package:${Application.applicationId ?? 'com.axion.app'}`,
   });
 }
 
