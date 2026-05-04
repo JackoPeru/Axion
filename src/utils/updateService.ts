@@ -3,6 +3,10 @@ import * as Application from 'expo-application';
 import { File, Paths, getContentUriAsync } from 'expo-file-system';
 import * as IntentLauncher from 'expo-intent-launcher';
 import { updateConfig } from '../config/update';
+import {
+  installApkWithNativeInstaller,
+  openNativeInstallPermissionSettings,
+} from '../native/AxionApkInstaller';
 
 export type UpdateCheckResult = {
   hasUpdate: boolean;
@@ -134,6 +138,11 @@ export async function installDownloadedApk(fileUri: string) {
     return 'Installazione APK disponibile solo su Android.';
   }
 
+  const nativeResult = await installApkWithNativeInstaller(fileUri);
+  if (nativeResult) {
+    return nativeResult;
+  }
+
   try {
     const contentUri = await getContentUriAsync(fileUri);
     await IntentLauncher.startActivityAsync(INSTALL_APK_ACTION, {
@@ -149,6 +158,11 @@ export async function installDownloadedApk(fileUri: string) {
 
 export async function openInstallPermissionSettings() {
   if (Platform.OS !== 'android') {
+    return;
+  }
+
+  const nativeOpened = await openNativeInstallPermissionSettings();
+  if (nativeOpened) {
     return;
   }
 

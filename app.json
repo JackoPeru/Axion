@@ -2,7 +2,7 @@
   "expo": {
     "name": "Axion",
     "slug": "axion",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "platforms": [
       "android"
     ],
@@ -16,6 +16,7 @@
       "backgroundColor": "#07090D"
     },
     "plugins": [
+      "./plugins/withAxionApkInstaller",
       [
         "expo-camera",
         {
@@ -33,7 +34,7 @@
     ],
     "android": {
       "package": "com.axion.app",
-      "versionCode": 2,
+      "versionCode": 3,
       "permissions": [
         "INTERNET",
         "REQUEST_INSTALL_PACKAGES",

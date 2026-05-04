@@ -74,13 +74,14 @@ Profile screen includes Android updater modeled after Nemoclaw:
 2. Compares local `app.json` version against release tag `vX.Y.Z`.
 3. Finds first release asset ending with `.apk`.
 4. Downloads APK into app document storage.
-5. Opens Android installer through intent.
+5. Opens Android installer through Axion native FileProvider module.
 
 Release requirement:
 
-- GitHub release tag newer than local version, for example `v1.0.1`.
-- Attach APK asset, for example `Axion-1.0.1.apk`.
+- GitHub release tag newer than local version, for example `v1.0.2`.
+- Attach APK asset, for example `Axion-1.0.2-release.apk`.
 - Device must allow Axion to install unknown apps when using direct APK updates outside Play Store.
+- If permission is missing, Axion opens Android's "install unknown apps" settings first, like ChatClaw.
 
 ## GitHub release automation
 
@@ -89,15 +90,15 @@ Workflow: `.github/workflows/android-release.yml`.
 Push a version tag:
 
 ```bash
-git tag v1.0.1
-git push origin v1.0.1
+git tag v1.0.2
+git push origin v1.0.2
 ```
 
-GitHub Actions builds Android release APK and attaches `Axion-1.0.1-release.apk` to the GitHub Release. In-app updater then detects it.
+GitHub Actions builds Android release APK and attaches `Axion-1.0.2-release.apk` to the GitHub Release. In-app updater then detects it.
 
 ## Native Android folder
 
-No `android/` folder is committed yet. Expo managed workflow is cleaner for current MVP. Generate native Android project only when custom native modules, signing customization or store-specific native changes become necessary:
+No `android/` folder is committed. Expo prebuild generates native Android code and `plugins/withAxionApkInstaller.js` injects the FileProvider + installer bridge each time:
 
 ```bash
 npx expo prebuild --platform android
