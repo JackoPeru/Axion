@@ -9,22 +9,31 @@ type RewardsScreenProps = {
   rewards: Reward[];
   user: UserProfile;
   venues: PartnerVenue[];
+  onRedeemReward: (reward: Reward) => void;
 };
 
-export function RewardsScreen({ rewards, user, venues }: RewardsScreenProps) {
+export function RewardsScreen({ onRedeemReward, rewards, user, venues }: RewardsScreenProps) {
   return (
     <Screen eyebrow="Partner network" title="Rewards e avamposti" subtitle="Ricompense mock pensate per locali reali: sconti, accessi, perk e status.">
       <View style={styles.panel}>
         {rewards.map((reward) => {
           const unlocked = user.points >= reward.requiredPoints;
+          const redeemed = user.redeemedRewardIds.includes(reward.id);
+          const label = redeemed ? 'Riscattata' : unlocked ? 'Ritira' : 'Bloccata';
           return (
             <View key={reward.id} style={styles.rewardRow}>
               <View style={styles.rewardMeta}>
                 <Text style={styles.title}>{reward.title}</Text>
                 <Text style={styles.copy}>{reward.description}</Text>
-                <Text style={styles.points}>{reward.requiredPoints} punti richiesti</Text>
+                <Text style={styles.points}>{reward.requiredPoints} punti richiesti{redeemed ? ' / codice attivo nel profilo' : ''}</Text>
               </View>
-              <ActionButton icon={unlocked ? 'ticket-outline' : 'lock-closed-outline'} label={unlocked ? 'Ritira' : 'Bloccata'} disabled={!unlocked} onPress={() => undefined} variant={unlocked ? 'secondary' : 'ghost'} />
+              <ActionButton
+                icon={redeemed ? 'checkmark-circle-outline' : unlocked ? 'ticket-outline' : 'lock-closed-outline'}
+                label={label}
+                disabled={!unlocked || redeemed}
+                onPress={() => onRedeemReward(reward)}
+                variant={unlocked && !redeemed ? 'secondary' : 'ghost'}
+              />
             </View>
           );
         })}

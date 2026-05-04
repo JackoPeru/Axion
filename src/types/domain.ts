@@ -16,6 +16,7 @@ export type MissionStatus = 'available' | 'active' | 'completed' | 'expired';
 export type Difficulty = 'low' | 'medium' | 'high' | 'critical';
 export type RewardType = 'discount' | 'access' | 'perk' | 'cashback' | 'status';
 export type ScreenName = 'home' | 'map' | 'missions' | 'leaderboard' | 'faction' | 'rewards' | 'profile' | 'missionDetail';
+export type MissionCompletionMethod = 'gps' | 'qr' | 'timer' | 'team' | 'demo';
 
 export type Coordinates = {
   latitude: number;
@@ -92,6 +93,17 @@ export type UserProfile = {
   statusTitle: string;
   points: number;
   completedMissionIds: string[];
+  redeemedRewardIds: string[];
 };
 
 export type FactionScores = Record<FactionId, number>;
+
+export type AppState = {
+  activeScreen: ScreenName;
+  selectedFactionId?: FactionId;
+  selectedMissionId: string;
+  missionStatuses: Record<string, MissionStatus>;
+  zoneState: Zone[];
+  factionScores: FactionScores;
+  userProfile: UserProfile;
+};

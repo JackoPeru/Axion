@@ -23,7 +23,7 @@ Configured now because MVP roadmap needs them:
 - `REQUEST_INSTALL_PACKAGES`
 - `VIBRATE`
 
-Current app still uses mock mission completion. Real GPS/QR implementation needs runtime permission screens and clear user-facing copy.
+Current app uses runtime permission flows for location and camera. GPS mission verification and QR outpost validation are implemented client-side for MVP.
 
 ## Local Android run
 
@@ -40,6 +40,18 @@ npm run android:device
 ```
 
 ## Build APK
+
+Local release APK with bundled JS:
+
+```bash
+npm run build:android:local
+```
+
+Output:
+
+```text
+android/app/build/outputs/apk/release/app-release.apk
+```
 
 Install or run EAS CLI, then authenticate:
 

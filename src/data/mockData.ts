@@ -324,11 +324,11 @@ export const missions: Mission[] = [
 ];
 
 export const users: UserProfile[] = [
-  { id: 'user-aria', alias: 'Aria', factionId: 'eclipse', level: 9, statusTitle: 'Shadow Lead', points: 2880, completedMissionIds: [] },
-  { id: 'user-mace', alias: 'Mace', factionId: 'vanguard', level: 8, statusTitle: 'Zone Breaker', points: 2510, completedMissionIds: [] },
-  { id: 'user-byte', alias: 'Byte', factionId: 'syndicate', level: 8, statusTitle: 'Intel Broker', points: 2440, completedMissionIds: [] },
-  { id: 'user-nova', alias: 'Nova', factionId: 'eclipse', level: 7, statusTitle: 'Night Runner', points: 2070, completedMissionIds: [] },
-  { id: 'user-kade', alias: 'Kade', factionId: 'vanguard', level: 6, statusTitle: 'Point Guard', points: 1840, completedMissionIds: [] },
+  { id: 'user-aria', alias: 'Aria', factionId: 'eclipse', level: 9, statusTitle: 'Shadow Lead', points: 2880, completedMissionIds: [], redeemedRewardIds: [] },
+  { id: 'user-mace', alias: 'Mace', factionId: 'vanguard', level: 8, statusTitle: 'Zone Breaker', points: 2510, completedMissionIds: [], redeemedRewardIds: [] },
+  { id: 'user-byte', alias: 'Byte', factionId: 'syndicate', level: 8, statusTitle: 'Intel Broker', points: 2440, completedMissionIds: [], redeemedRewardIds: [] },
+  { id: 'user-nova', alias: 'Nova', factionId: 'eclipse', level: 7, statusTitle: 'Night Runner', points: 2070, completedMissionIds: [], redeemedRewardIds: [] },
+  { id: 'user-kade', alias: 'Kade', factionId: 'vanguard', level: 6, statusTitle: 'Point Guard', points: 1840, completedMissionIds: [], redeemedRewardIds: [] },
 ];
 
 export const initialUserProfile: UserProfile = {
@@ -339,6 +339,7 @@ export const initialUserProfile: UserProfile = {
   statusTitle: 'Recruit',
   points: 180,
   completedMissionIds: [],
+  redeemedRewardIds: [],
 };
 
 export const initialFactionScores: FactionScores = {

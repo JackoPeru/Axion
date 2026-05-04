@@ -15,13 +15,26 @@
       "resizeMode": "contain",
       "backgroundColor": "#07090D"
     },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Axion usa la camera per scansionare QR presso avamposti partner.",
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Axion usa la posizione per verificare missioni geolocalizzate.",
+          "locationWhenInUsePermission": "Axion usa la posizione per verificare missioni geolocalizzate."
+        }
+      ]
+    ],
     "android": {
       "package": "com.axion.app",
       "versionCode": 1,
       "permissions": [
-        "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION",
-        "CAMERA",
         "INTERNET",
         "REQUEST_INSTALL_PACKAGES",
         "VIBRATE"

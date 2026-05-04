@@ -19,6 +19,7 @@ Core loop:
 7. Rewards and partner venues give concrete reason to return.
 
 MVP includes mock data for 3 factions, 5 city zones, 10 missions, 3 partner venues, 5 rewards, leaderboard and faction scores.
+Current Android build also includes local persistence, GPS verification, QR outpost validation, timed zone hold, reward redemption and in-app APK updater.
 
 ## Stack found
 
@@ -29,7 +30,8 @@ Repository was empty before scaffold. New Android-first stack:
 - React `19`
 - TypeScript strict mode
 - Android package `com.axion.app`
-- Local state only, no backend yet
+- Persisted local state with `AsyncStorage`
+- Device APIs: location, camera QR, haptics
 
 This is suitable for Android MVP because it keeps iteration fast and can later accept real auth, map SDK, location APIs, QR scanning and backend without replacing product structure.
 
@@ -56,16 +58,16 @@ Android build docs: `docs/android.md`.
 ## Current limits
 
 - Auth is mock/local only.
-- Map is a dark zone mock, not real GPS.
-- Mission completion is simulated.
+- Map is still a dark zone mock, but mission verification can use real GPS.
+- Team missions and demo override are still local MVP flows.
 - QR, anti-cheat, push, payments, chat and real multiplayer are intentionally excluded.
-- Partner and reward redemption are mocked.
+- Partner and reward redemption are local only.
 - In-app Android updater checks GitHub Releases and expects an `.apk` asset on `JackoPeru/Axion`.
 
 ## Next technical tasks
 
-1. Add file-based navigation with Expo Router.
-2. Add persistent storage for selected faction, user profile and mission states.
-3. Replace mock map with real map SDK and permission flow.
-4. Add backend schema for users, missions, zones, venues and reward redemptions.
-5. Add location validation and basic anti-abuse checks for mission completion.
+1. Replace mock zone view with real map SDK.
+2. Add backend schema for users, missions, zones, venues and reward redemptions.
+3. Add server-side location validation and anti-abuse checks.
+4. Add release signing and Play Store/AAB pipeline.
+5. Add weekly events and remote mission feed.

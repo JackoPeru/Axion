@@ -5,6 +5,7 @@ import { FactionBadge } from '../components/FactionBadge';
 import { Screen } from '../components/Screen';
 import { StatCard } from '../components/StatCard';
 import { UpdatePanel } from '../components/UpdatePanel';
+import { ActionButton } from '../components/ActionButton';
 
 type ProfileScreenProps = {
   completedMissions: Mission[];
@@ -12,9 +13,10 @@ type ProfileScreenProps = {
   rank: number;
   rewardCount: number;
   user: UserProfile;
+  onResetLocalState: () => void;
 };
 
-export function ProfileScreen({ completedMissions, faction, rank, rewardCount, user }: ProfileScreenProps) {
+export function ProfileScreen({ completedMissions, faction, onResetLocalState, rank, rewardCount, user }: ProfileScreenProps) {
   return (
     <Screen eyebrow="Profilo operatore" title={user.alias} subtitle="Progressione locale, status e impatto sulla rete. Login e persistenza sono mock per MVP iniziale.">
       <FactionBadge faction={faction} />
@@ -29,8 +31,15 @@ export function ProfileScreen({ completedMissions, faction, rank, rewardCount, u
         <Text style={styles.value}>{user.statusTitle}</Text>
         <Text style={styles.label}>Missioni completate</Text>
         <Text style={styles.value}>{completedMissions.length}</Text>
+        <Text style={styles.label}>Rewards riscattate</Text>
+        <Text style={styles.value}>{user.redeemedRewardIds.length}</Text>
       </View>
       <UpdatePanel />
+      <View style={styles.panel}>
+        <Text style={styles.label}>Dati locali</Text>
+        <Text style={styles.copy}>Resetta profilo, fazione, missioni, score e rewards salvate sul dispositivo.</Text>
+        <ActionButton icon="trash-outline" label="Reset dati locali" onPress={onResetLocalState} variant="ghost" />
+      </View>
     </Screen>
   );
 }
@@ -60,5 +69,10 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     fontSize: 16,
     fontWeight: '700',
+  },
+  copy: {
+    color: theme.colors.textSoft,
+    fontSize: 13,
+    lineHeight: 19,
   },
 });

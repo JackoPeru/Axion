@@ -66,6 +66,7 @@ export function completeMission(input: CompleteMissionInput) {
       completedMissionIds: user.completedMissionIds.includes(mission.id)
         ? user.completedMissionIds
         : [...user.completedMissionIds, mission.id],
+      redeemedRewardIds: user.redeemedRewardIds,
       statusTitle: user.points + mission.userPoints >= 1500 ? 'Field Operator' : user.statusTitle,
     },
     zones: nextZones,

@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import type { Faction } from '../types/domain';
@@ -6,10 +7,12 @@ import { theme } from '../theme/theme';
 
 type OnboardingScreenProps = {
   factions: Faction[];
-  onSelectFaction: (faction: Faction) => void;
+  onSelectFaction: (faction: Faction, alias: string) => void;
 };
 
 export function OnboardingScreen({ factions, onSelectFaction }: OnboardingScreenProps) {
+  const [alias, setAlias] = useState('Operatore 17');
+
   return (
     <View style={styles.container}>
       <LinearGradient colors={['rgba(244,241,234,0.08)', 'rgba(244,241,234,0.01)']} style={styles.header}>
@@ -24,11 +27,23 @@ export function OnboardingScreen({ factions, onSelectFaction }: OnboardingScreen
           Tre reti rivali competono per zone, vantaggi reali e status locale. La scelta determina stile operativo, ranking e missioni prioritarie.
         </Text>
       </LinearGradient>
+      <View style={styles.loginPanel}>
+        <Text style={styles.loginLabel}>Alias operativo</Text>
+        <TextInput
+          autoCapitalize="words"
+          maxLength={24}
+          onChangeText={setAlias}
+          placeholder="Operatore 17"
+          placeholderTextColor={theme.colors.textMuted}
+          style={styles.input}
+          value={alias}
+        />
+      </View>
       <View style={styles.list}>
         {factions.map((faction) => (
           <Pressable
             key={faction.id}
-            onPress={() => onSelectFaction(faction)}
+            onPress={() => onSelectFaction(faction, alias.trim() || 'Operatore 17')}
             style={({ pressed }) => [styles.factionCard, { borderColor: faction.color }, pressed && styles.pressed]}
           >
             <View style={styles.cardHeader}>
@@ -96,6 +111,31 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: theme.spacing.md,
+  },
+  loginPanel: {
+    backgroundColor: theme.colors.surfaceRaised,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    gap: theme.spacing.sm,
+    padding: theme.spacing.md,
+    ...theme.shadow.card,
+  },
+  loginLabel: {
+    color: theme.colors.gold,
+    fontSize: 12,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  input: {
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.borderStrong,
+    borderRadius: theme.radius.sm,
+    borderWidth: 1,
+    color: theme.colors.text,
+    fontSize: 16,
+    minHeight: 46,
+    paddingHorizontal: theme.spacing.md,
   },
   factionCard: {
     backgroundColor: theme.colors.surfaceRaised,
