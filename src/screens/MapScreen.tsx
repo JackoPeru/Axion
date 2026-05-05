@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import * as Location from 'expo-location';
 import MapView, { Circle, Marker, UrlTile, type Region } from 'react-native-maps';
@@ -76,7 +76,7 @@ export function MapScreen({ missions, onOpenMission, partnerVenues, zones }: Map
             const owner = factions.find((faction) => faction.id === zone.controllingFactionId);
             const zoneMission = missions.find((mission) => mission.zoneId === zone.id && mission.status !== 'completed');
             return (
-              <View key={zone.id}>
+              <Fragment key={zone.id}>
                 <Circle
                   center={zone.center}
                   fillColor={`${owner?.color ?? '#C8A96A'}26`}
@@ -91,7 +91,7 @@ export function MapScreen({ missions, onOpenMission, partnerVenues, zones }: Map
                   pinColor={owner?.color ?? theme.colors.gold}
                   title={zone.name}
                 />
-              </View>
+              </Fragment>
             );
           })}
           {partnerVenues.map((venue) => (
