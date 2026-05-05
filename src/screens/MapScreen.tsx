@@ -39,7 +39,9 @@ export function MapScreen({ missions, onOpenMission, partnerVenues, zones }: Map
     Location.requestForegroundPermissionsAsync()
       .then((permission) => {
         if (!permission.granted) {
-          setLocationStatus('Permesso posizione non concesso. Mappa zone disponibile senza posizione utente.');
+          if (mounted) {
+            setLocationStatus('Permesso posizione non concesso. Mappa zone disponibile senza posizione utente.');
+          }
           return undefined;
         }
 
@@ -54,7 +56,11 @@ export function MapScreen({ missions, onOpenMission, partnerVenues, zones }: Map
           setLocationStatus('Posizione utente attiva.');
         }
       })
-      .catch(() => setLocationStatus('Posizione non disponibile. Verifica GPS dispositivo.'));
+      .catch(() => {
+        if (mounted) {
+          setLocationStatus('Posizione non disponibile. Verifica GPS dispositivo.');
+        }
+      });
 
     return () => {
       mounted = false;

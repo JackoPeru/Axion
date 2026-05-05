@@ -2,7 +2,7 @@
   "expo": {
     "name": "Axion",
     "slug": "axion",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "platforms": [
       "android"
     ],
@@ -34,7 +34,7 @@
     ],
     "android": {
       "package": "com.axion.app",
-      "versionCode": 5,
+      "versionCode": 6,
       "permissions": [
         "INTERNET",
         "REQUEST_INSTALL_PACKAGES",

@@ -77,28 +77,33 @@ export function MissionDetailScreen({
   }, [holdStartedAt, mission, onCompleteMission]);
 
   const verifyGps = async () => {
-    if (!zone) {
-      setStatusMessage('Zona non trovata. Impossibile verificare GPS.');
+    try {
+      if (!zone) {
+        setStatusMessage('Zona non trovata. Impossibile verificare GPS.');
+        return;
+      }
+
+      const permission = await Location.requestForegroundPermissionsAsync();
+      if (!permission.granted) {
+        setStatusMessage('Permesso posizione negato. Abilitalo per missioni GPS.');
+        return;
+      }
+
+      const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      const validation = validateMissionLocation(position, zone);
+      setDistanceLabel(formatDistance(validation.distance));
+
+      if (validation.ok) {
+        setStatusMessage('Presenza GPS confermata. Missione completata.');
+        onCompleteMission(mission);
+        return;
+      }
+
+      setStatusMessage(validation.reason);
+    } catch {
+      setStatusMessage('Verifica GPS non disponibile sul dispositivo.');
       return;
     }
-
-    const permission = await Location.requestForegroundPermissionsAsync();
-    if (!permission.granted) {
-      setStatusMessage('Permesso posizione negato. Abilitalo per missioni GPS.');
-      return;
-    }
-
-    const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-    const validation = validateMissionLocation(position, zone);
-    setDistanceLabel(formatDistance(validation.distance));
-
-    if (validation.ok) {
-      setStatusMessage('Presenza GPS confermata. Missione completata.');
-      onCompleteMission(mission);
-      return;
-    }
-
-    setStatusMessage(validation.reason);
   };
 
   const verifyQrCode = (value: string) => {
@@ -125,16 +130,21 @@ export function MissionDetailScreen({
   };
 
   const openScanner = async () => {
-    if (!cameraPermission?.granted) {
-      const permission = await requestCameraPermission();
-      if (!permission.granted) {
-        setStatusMessage('Permesso camera negato. Inserisci codice outpost manualmente.');
-        return;
+    try {
+      if (!cameraPermission?.granted) {
+        const permission = await requestCameraPermission();
+        if (!permission.granted) {
+          setStatusMessage('Permesso camera negato. Inserisci codice outpost manualmente.');
+          return;
+        }
       }
-    }
 
-    setIsScanning(true);
-    setStatusMessage('Inquadra QR outpost partner.');
+      setIsScanning(true);
+      setStatusMessage('Inquadra QR outpost partner.');
+    } catch {
+      setStatusMessage('Scanner camera non disponibile. Usa codice manuale.');
+      setIsScanning(false);
+    }
   };
 
   const handleScan = (result: BarcodeScanningResult) => {
@@ -146,28 +156,32 @@ export function MissionDetailScreen({
   };
 
   const startHold = async () => {
-    if (!zone) {
-      setStatusMessage('Zona non trovata. Impossibile avviare presidio.');
-      return;
+    try {
+      if (!zone) {
+        setStatusMessage('Zona non trovata. Impossibile avviare presidio.');
+        return;
+      }
+
+      const permission = await Location.requestForegroundPermissionsAsync();
+      if (!permission.granted) {
+        setStatusMessage('Permesso posizione negato. Avvio presidio simulato disponibile.');
+        return;
+      }
+
+      const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      const validation = validateMissionLocation(position, zone);
+      setDistanceLabel(formatDistance(validation.distance));
+
+      if (!validation.ok) {
+        setStatusMessage(validation.reason);
+        return;
+      }
+
+      setHoldStartedAt(Date.now());
+      setStatusMessage('Presidio avviato. Mantieni posizione per 30 secondi.');
+    } catch {
+      setStatusMessage('Presidio GPS non disponibile sul dispositivo.');
     }
-
-    const permission = await Location.requestForegroundPermissionsAsync();
-    if (!permission.granted) {
-      setStatusMessage('Permesso posizione negato. Avvio presidio simulato disponibile.');
-      return;
-    }
-
-    const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-    const validation = validateMissionLocation(position, zone);
-    setDistanceLabel(formatDistance(validation.distance));
-
-    if (!validation.ok) {
-      setStatusMessage(validation.reason);
-      return;
-    }
-
-    setHoldStartedAt(Date.now());
-    setStatusMessage('Presidio avviato. Mantieni posizione per 30 secondi.');
   };
 
   const completeTeamMission = () => {

@@ -32,12 +32,19 @@ export default function App() {
   useEffect(() => {
     let mounted = true;
 
-    loadAppState().then((loadedState) => {
-      if (mounted) {
-        setAppState(loadedState);
-        setIsReady(true);
-      }
-    });
+    loadAppState()
+      .then((loadedState) => {
+        if (mounted) {
+          setAppState(loadedState);
+          setIsReady(true);
+        }
+      })
+      .catch(() => {
+        if (mounted) {
+          setAppState(createInitialAppState());
+          setIsReady(true);
+        }
+      });
 
     return () => {
       mounted = false;
@@ -46,7 +53,7 @@ export default function App() {
 
   useEffect(() => {
     if (isReady) {
-      saveAppState(appState);
+      void saveAppState(appState).catch(() => undefined);
     }
   }, [appState, isReady]);
 
@@ -74,7 +81,7 @@ export default function App() {
   };
 
   const selectFaction = (faction: Faction, alias: string) => {
-    Haptics.selectionAsync();
+    void Haptics.selectionAsync().catch(() => undefined);
     setAppState((current) => {
       const nextState: AppState = {
         ...current,
@@ -82,31 +89,35 @@ export default function App() {
         userProfile: { ...current.userProfile, alias, factionId: faction.id },
         activeScreen: 'home',
       };
-      syncProfile(nextState);
+      void syncProfile(nextState).catch(() => undefined);
       return nextState;
     });
   };
 
   const cloudAuth = async (email: string, password: string, mode: CloudAuthMode) => {
     setAuthMessage('Connessione cloud...');
-    const result = await authenticateWithEmail(email, password, mode);
-    if (result.error) {
-      setAuthMessage(result.error);
-      return;
-    }
+    try {
+      const result = await authenticateWithEmail(email, password, mode);
+      if (result.error) {
+        setAuthMessage(result.error);
+        return;
+      }
 
-    if (result.userId) {
-      const userId = result.userId;
-      setAppState((current) => ({
-        ...current,
-        userProfile: { ...current.userProfile, id: userId },
-      }));
-      setAuthMessage('Account cloud collegato. Scegli fazione.');
+      if (result.userId) {
+        const userId = result.userId;
+        setAppState((current) => ({
+          ...current,
+          userProfile: { ...current.userProfile, id: userId },
+        }));
+        setAuthMessage('Account cloud collegato. Scegli fazione.');
+      }
+    } catch {
+      setAuthMessage('Connessione cloud non disponibile. Profilo locale attivo.');
     }
   };
 
   const acceptMission = (mission: Mission) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => undefined);
     setAppState((current) => ({
       ...current,
       selectedMissionId: mission.id,
@@ -128,7 +139,7 @@ export default function App() {
       user: appState.userProfile,
     });
 
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => undefined);
     const nextState: AppState = {
       ...appState,
       missionStatuses: { ...appState.missionStatuses, [mission.id]: 'completed' as MissionStatus },
@@ -137,8 +148,8 @@ export default function App() {
       userProfile: result.user,
     };
     setAppState(nextState);
-    syncProfile(nextState);
-    recordMissionCompletion(nextState, mission);
+    void syncProfile(nextState).catch(() => undefined);
+    void recordMissionCompletion(nextState, mission).catch(() => undefined);
   };
 
   const redeemReward = (reward: Reward) => {
@@ -146,7 +157,7 @@ export default function App() {
       return;
     }
 
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => undefined);
     const nextState = {
       ...appState,
       userProfile: {
@@ -155,13 +166,13 @@ export default function App() {
       },
     };
     setAppState(nextState);
-    syncProfile(nextState);
-    recordRewardRedemption(nextState, reward);
+    void syncProfile(nextState).catch(() => undefined);
+    void recordRewardRedemption(nextState, reward).catch(() => undefined);
   };
 
   const resetLocalState = async () => {
     const resetState = await resetAppState();
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => undefined);
     setAppState(resetState);
   };
 
