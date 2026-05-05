@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 
 import { TabBar } from './src/components/TabBar';
+import { ScreenErrorBoundary } from './src/components/ScreenErrorBoundary';
 import { factions, missions, partnerVenues, rewards, users } from './src/data/mockData';
 import type { AppState, Faction, Mission, MissionStatus, Reward, ScreenName } from './src/types/domain';
 import { completeMission, getMissionReward, getMissionsByStatus, getUserRank } from './src/utils/gameLogic';
@@ -213,43 +214,45 @@ export default function App() {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style="light" />
       <LinearGradient colors={['#05070A', '#091018', '#05070A']} style={styles.appShell}>
-        {appState.activeScreen === 'home' && (
-          <HomeScreen
-            {...screenProps}
-            activeMissions={getMissionsByStatus(missionState, 'active')}
-            rank={getUserRank(localLeaderboard, appState.userProfile.id)}
-            onOpenMission={openMission}
-            onNavigate={setActiveScreen}
-          />
-        )}
-        {appState.activeScreen === 'map' && <MapScreen {...screenProps} onOpenMission={openMission} />}
-        {appState.activeScreen === 'missions' && <MissionsScreen {...screenProps} onAcceptMission={acceptMission} onOpenMission={openMission} />}
-        {appState.activeScreen === 'leaderboard' && <LeaderboardScreen factions={factions} users={localLeaderboard} factionScores={appState.factionScores} />}
-        {appState.activeScreen === 'faction' && <FactionScreen faction={selectedFaction} factions={factions} factionScores={appState.factionScores} zones={appState.zoneState} />}
-        {appState.activeScreen === 'rewards' && <RewardsScreen rewards={rewards} venues={partnerVenues} user={appState.userProfile} onRedeemReward={redeemReward} />}
-        {appState.activeScreen === 'profile' && (
-          <ProfileScreen
-            faction={selectedFaction}
-            user={appState.userProfile}
-            completedMissions={getMissionsByStatus(missionState, 'completed')}
-            rank={getUserRank(localLeaderboard, appState.userProfile.id)}
-            rewardCount={rewards.filter((reward) => reward.requiredPoints <= appState.userProfile.points).length}
-            onResetLocalState={resetLocalState}
-          />
-        )}
-        {appState.activeScreen === 'missionDetail' && selectedMission && (
-          <MissionDetailScreen
-            faction={selectedFaction}
-            mission={selectedMission}
-            reward={getMissionReward(selectedMission, rewards)}
-            zone={appState.zoneState.find((zone) => zone.id === selectedMission.zoneId)}
-            venues={partnerVenues}
-            onAcceptMission={acceptMission}
-            onCompleteMission={finishMission}
-            onBack={() => setActiveScreen('missions')}
-            onExpireMission={(mission) => setMissionStatus(mission.id, 'expired')}
-          />
-        )}
+        <ScreenErrorBoundary onGoHome={() => setActiveScreen('home')} onResetLocalState={resetLocalState}>
+          {appState.activeScreen === 'home' && (
+            <HomeScreen
+              {...screenProps}
+              activeMissions={getMissionsByStatus(missionState, 'active')}
+              rank={getUserRank(localLeaderboard, appState.userProfile.id)}
+              onOpenMission={openMission}
+              onNavigate={setActiveScreen}
+            />
+          )}
+          {appState.activeScreen === 'map' && <MapScreen {...screenProps} onOpenMission={openMission} />}
+          {appState.activeScreen === 'missions' && <MissionsScreen {...screenProps} onAcceptMission={acceptMission} onOpenMission={openMission} />}
+          {appState.activeScreen === 'leaderboard' && <LeaderboardScreen factions={factions} users={localLeaderboard} factionScores={appState.factionScores} />}
+          {appState.activeScreen === 'faction' && <FactionScreen faction={selectedFaction} factions={factions} factionScores={appState.factionScores} zones={appState.zoneState} />}
+          {appState.activeScreen === 'rewards' && <RewardsScreen rewards={rewards} venues={partnerVenues} user={appState.userProfile} onRedeemReward={redeemReward} />}
+          {appState.activeScreen === 'profile' && (
+            <ProfileScreen
+              faction={selectedFaction}
+              user={appState.userProfile}
+              completedMissions={getMissionsByStatus(missionState, 'completed')}
+              rank={getUserRank(localLeaderboard, appState.userProfile.id)}
+              rewardCount={rewards.filter((reward) => reward.requiredPoints <= appState.userProfile.points).length}
+              onResetLocalState={resetLocalState}
+            />
+          )}
+          {appState.activeScreen === 'missionDetail' && selectedMission && (
+            <MissionDetailScreen
+              faction={selectedFaction}
+              mission={selectedMission}
+              reward={getMissionReward(selectedMission, rewards)}
+              zone={appState.zoneState.find((zone) => zone.id === selectedMission.zoneId)}
+              venues={partnerVenues}
+              onAcceptMission={acceptMission}
+              onCompleteMission={finishMission}
+              onBack={() => setActiveScreen('missions')}
+              onExpireMission={(mission) => setMissionStatus(mission.id, 'expired')}
+            />
+          )}
+        </ScreenErrorBoundary>
       </LinearGradient>
       <TabBar activeScreen={appState.activeScreen} onChange={setActiveScreen} />
     </SafeAreaView>

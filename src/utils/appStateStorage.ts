@@ -1,12 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { AppState } from '../types/domain';
+import type { AppState, ScreenName } from '../types/domain';
 import { initialFactionScores, initialUserProfile, missions, zones } from '../data/mockData';
 
 const STORAGE_KEY = '@axion/app-state/v1';
+const STARTUP_SCREEN: ScreenName = 'home';
 
 export function createInitialAppState(): AppState {
   return {
-    activeScreen: 'home',
+    activeScreen: STARTUP_SCREEN,
     selectedMissionId: missions[0]?.id ?? '',
     selectedFactionId: undefined,
     missionStatuses: Object.fromEntries(missions.map((mission) => [mission.id, mission.status])),
@@ -29,6 +30,7 @@ export async function loadAppState(): Promise<AppState> {
     return {
       ...fallback,
       ...parsed,
+      activeScreen: STARTUP_SCREEN,
       missionStatuses: {
         ...fallback.missionStatuses,
         ...(parsed.missionStatuses ?? {}),
